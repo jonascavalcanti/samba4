@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: Service
+metadata:
+        name: svc-samba4
+spec:
+        selector:
+                app: samba4-app
+        ports:
+              - name: samba4-tcp135
+                protocol: TCP
+                port: 135
+                nodePort: 135
+                targetPort: 135
+              - name: samba4-udp137
+                protocol: UDP
+                port: 137
+                nodePort: 137
+                targetPort: 137
+              - name: samba4-tcp137
+                protocol: TCP
+                port: 137
+                nodePort: 137
+                targetPort: 137
+              - name: samba4-tcp138
+                protocol: TCP
+                port: 138
+                nodePort: 138
+                targetPort: 138
+              - name: samba4-udp138
+                protocol: UDP
+                port: 138
+                nodePort: 138
+                targetPort: 138
+              - name: samba4-tcp139
+                protocol: TCP
+                port: 139
+                nodePort: 139
+                targetPort: 139
+              - name: samba4-tcp389
+                protocol: TCP
+                port: 389
+                nodePort: 389
+                targetPort: 389
+              - name: samba4-udp389
+                protocol: UDP
+                port: 389
+                nodePort: 389
+                targetPort: 389
+              - name: samba4-tcp445
+                protocol: TCP
+                port: 445
+                nodePort: 445
+                targetPort: 445
+              - name: samba4-tcp636
+                protocol: TCP
+                port: 636
+                nodePort: 636
+                targetPort: 636
+              - name: samba4-tcp53
+                protocol: TCP
+                port: 53
+                nodePort: 53
+                targetPort: 53
+              - name: samba4-udp53
+                protocol: UDP
+                port: 53
+                nodePort: 53
+                targetPort: 53
+        type: NodePort
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment 
+metadata:
+  name: samba4-dpt-prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: samba4-app
+    spec:
+      containers:
+      - name: samba4-con
+        image: dkhub.funceme.br:444/unisp/samba4
+        ports:
+        - name: samba4-tcp135
+          containerPort: 135
+        - name: samba4-udp137
+          containerPort: 137
+        - name: samba4-tcp137
+          containerPort: 137
+        - name: samba4-tcp138
+          containerPort: 138
+        - name: samba4-udp138
+          containerPort: 138
+        - name: samba4-tcp139
+          containerPort: 139
+        - name: samba4-tcp389
+          containerPort: 389
+        - name: samba4-tcp445
+          containerPort: 445
+        - name: samba4-tcp636
+          containerPort: 636
+        - name: samba4-tcp53
+          containerPort: 53
+        - name: samba4-udp53
+          containerPort: 53
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /malhadagua
+          name: malhadagua
+        - mountPath: /meioambiente
+          name: meioambiente 
+        - mountPath: /home
+          name: homeusers 
+        - mountPath: /var/lib/ldap
+          name: ldap
+      volumes:
+      - name: malhadagua
+        hostPath:
+          path: /malhadagua
+      - name: meioambiente
+        hostPath:
+          path: /meioambiente
+      - name: homeusers
+        hostPath:
+          path: /home
+      - name: ldap
+        hostPath:
+          path: /mnt/nas/devops/samba4/openldap  
+      imagePullSecrets:      
+      - name: dkhub.funceme.br-registry-secret
+      nodeSelector:
+        env: master
+        workldap: "yes"

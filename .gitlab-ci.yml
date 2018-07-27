@@ -1,0 +1,32 @@
+variables:
+  REGISTRY_HOST: "dkhub.funceme.br:444"
+  TAGNAME: "latest"
+
+stages:
+  - build
+  - deploy
+
+build_image:
+  stage: build
+  image: docker:latest
+  script:
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD $REGISTRY_HOST
+    - docker build -t $REGISTRY_HOST/$CI_PROJECT_PATH:$TAGNAME .
+    - docker push $REGISTRY_HOST/$CI_PROJECT_PATH:$TAGNAME
+  only:
+    - master
+  
+deploy_kubernetes:
+  stage: deploy
+  image: dkhub.funceme.br:444/devops/kubernetes-deploy
+  variables:
+    KUBE_DOMAIN: funceme.br
+    CI_ENVIRONMENT_URL: http://$CI_PROJECT_NAME.$KUBE_DOMAIN
+  script:
+    - command deploy
+  environment:
+    name: production
+    url: http://$CI_PROJECT_NAME.$KUBE_DOMAIN
+  when: manual
+  only:
+    - master

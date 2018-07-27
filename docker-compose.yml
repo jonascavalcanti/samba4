@@ -1,0 +1,34 @@
+version: '3'
+services:
+  dc:
+    build: .
+    restart: always
+    container_name: dc
+    hostname: ad
+    network_mode: "host"
+    ports: 
+      - 53:53 
+      - 53:53/udp 
+      - 88:88 
+      - 88:88/udp 
+      - 135:135 
+      - 137:137/udp 
+      - 138:138/udp 
+      - 139:139 
+      - 389:389 
+      - 389:389/udp 
+      - 445:445
+      - 464:464 
+      - 464:464/udp 
+      - 636:636
+    privileged: true
+    environment:
+      - DOMAIN=mycompany.com.br
+      - SAMBA_DOMAIN=MYCOMPANY
+      - SAMBA_REALM=MYCOMPANY.LOCAL
+      - SAMBA_ADMIN_PASSWORD=12345678
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /samba4/netlogon/scripts:/usr/local/samba/var/locks/sysvol/mycompany.local/scripts
+      - /samba4/data:/usr/local/samba/private/
+      - /samba4/etc:/usr/local/samba/etc/

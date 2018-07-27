@@ -1,0 +1,60 @@
+1. Download epel repository
+
+# yum install epel-release.noarch -y
+# yum update -y
+
+2. Pacotes necessarios para samba
+
+# yum install -y attr bind-utils docbook-style-xsl gcc gdb krb5-workstation \
+       libsemanage-python libxslt perl perl-ExtUtils-MakeMaker \
+       perl-Parse-Yapp perl-Test-Base pkgconfig policycoreutils-python \
+       python-crypto gnutls-devel libattr-devel keyutils-libs-devel cups-devel \
+       libacl-devel libaio-devel libblkid-devel libxml2-devel openldap-devel \
+       pam-devel popt-devel python-devel readline-devel zlib-devel systemd-devel \
+       libunistring.x86_64 libunistring-devel.x86_64
+
+3. Verify that the /etc/hosts file on the DC correctly resolves the fully-qualified domain name (FQDN) and short host name to the LAN IP address of the DC. For example:
+
+127.0.0.1     localhost localhost.localdomain
+10.99.0.1     DC1.samdom.example.com     DC1
+
+The host name and FQDN must not resolve to the 127.0.0.1 IP address or any other IP address than the one used on the LAN interface of the DC.
+
+4. If you previously ran a Samba installation on this host:
+
+        Remove the existing smb.conf file. To list the path to the file:
+
+# smbd -b | grep "CONFIGFILE"
+   CONFIGFILE: /usr/local/samba/etc/samba/smb.conf
+
+5.          Remove all Samba database files, such as *.tdb and *.ldb files. To list the folders containing Samba databases:
+
+# smbd -b | egrep "LOCKDIR|STATEDIR|CACHEDIR|PRIVATE_DIR"
+  LOCKDIR: /usr/local/samba/var/lock/
+  STATEDIR: /usr/local/samba/var/locks/
+  CACHEDIR: /usr/local/samba/var/cache/
+  PRIVATE_DIR: /usr/local/samba/private/
+
+6. Remove an existing /etc/krb5.conf file:
+
+# rm /etc/krb5.conf
+
+7. Install SAMBA
+# cd /opt \
+# wget --no-check-certificate https://download.samba.org/pub/samba/stable/samba-${SAMBA_VERSION}.tar.gz \
+# tar -zxf samba-${SAMBA_VERSION}.tar.gz \
+# cd /opt/samba-${SAMBA_VERSION}/ \
+# ./configure \ 
+# make 
+# make install
+# samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm=FUNCEME.LOCAL --domain=FUNCEME --adminpass=A5AU7cws --option="interfaces=lo ens192"
+# ln -sf /usr/local/samba/private/krb5.conf /etc/krb5.conf 
+# rm -rf /lib64/libnss_winbind.so.2
+# ln -s /usr/local/samba/lib/libnss_winbind.so.2 /lib64/
+# ln -s /lib64/libnss_winbind.so.2 /lib64/libnss_winbind.so
+# ldconfig
+
+
+# samba-tool domain passwordsettings set --complexity=off
+
+
