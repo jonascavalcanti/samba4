@@ -4,8 +4,8 @@ LABEL maintainer="unisp <cicero.gadelha@funceme.br | jonas.cavalcantineto@funcem
 RUN yum update -y
 RUN yum install epel-release.noarch -y
 RUN yum  install -y \
-        supervisor wget attr bind-utils docbook-style-xsl gcc gdb krb5-workstation \
-        libsemanage-python libxslt perl perl-ExtUtils-MakeMaker \
+        supervisor wget attr bind-utils vim docbook-style-xsl gcc gdb krb5-workstation \
+        libsemanage-python libxslt telnet perl perl-ExtUtils-MakeMaker \
         perl-Parse-Yapp perl-Test-Base pkgconfig policycoreutils-python \
         python-crypto gnutls-devel libattr-devel keyutils-libs-devel cups-devel \
         libacl-devel libaio-devel libblkid-devel libxml2-devel openldap-devel \
@@ -27,26 +27,25 @@ RUN set -ex \
         && make \
         && make install
 
-ENV DOMAIN="company.com."
+
+ENV DOMAIN="mycompany.com."
+ENV NETBIOS_NAME="ad"
+ENV SAMBA_AD_NAME_SERVER="myad.mycompany.com.br"
 ENV SAMBA_DOMAIN="MYCOMPANY"
 ENV SAMBA_REALM="MYCOMPANY.LOCAL"
+ENV IP_BIND_SAMBA_AD_SERVER="127.0.0.1"
 ENV SAMBA_ADMIN_PASSWORD="12345678"
 
-RUN set -ex \
-        && mkdir -p /var/log/samba/ \
-        && touch /var/log/samba/samba.log
+ADD confs/supervisord.conf /etc/supervisord.conf
+ADD confs/krb5.conf /tmp/krb5.conf
 
-COPY confs/supervisord.conf /etc/supervisord.conf
-COPY confs/smb.conf /tmp/smb.conf
-COPY confs/krb5.conf /tmp/krb5.conf
-
-COPY confs/init_samab4_conf.sh /init_samab4_conf.sh
+ADD confs/init_samab4_conf.sh /init_samab4_conf.sh
 RUN chmod +x /init_samab4_conf.sh
 
-COPY confs/start.sh /start.sh
+ADD confs/start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 53/tcp 53/udp 88/tcp 88/udp 135/tcp 137/udp 138/udp 139/tcp 389/tcp 389/udp 445/tcp 464/tcp 464/udp 636/tcp
+EXPOSE 53/tcp 53/udp 88/tcp 88/udp 123/udp 135/tcp 137/udp 138/udp 139/tcp 389/tcp 389/udp 445/tcp 464/tcp 464/udp 636/tcp 3268/tcp 3269/tcp 49152-65535/tcp
  
 WORKDIR /usr/local/samba/
 

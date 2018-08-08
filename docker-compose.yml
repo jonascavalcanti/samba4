@@ -1,34 +1,47 @@
-version: '3'
+version: '3.7'
 services:
-  dc:
-    build: .
-    restart: always
-    container_name: dc
-    hostname: ad
-    network_mode: "host"
-    ports: 
-      - 53:53 
-      - 53:53/udp 
-      - 88:88 
-      - 88:88/udp 
-      - 135:135 
-      - 137:137/udp 
-      - 138:138/udp 
-      - 139:139 
-      - 389:389 
-      - 389:389/udp 
-      - 445:445
-      - 464:464 
-      - 464:464/udp 
-      - 636:636
-    privileged: true
-    environment:
-      - DOMAIN=mycompany.com.br
-      - SAMBA_DOMAIN=MYCOMPANY
-      - SAMBA_REALM=MYCOMPANY.LOCAL
-      - SAMBA_ADMIN_PASSWORD=12345678
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup
-      - /samba4/netlogon/scripts:/usr/local/samba/var/locks/sysvol/mycompany.local/scripts
-      - /samba4/data:/usr/local/samba/private/
-      - /samba4/etc:/usr/local/samba/etc/
+  4k-samba-ad:
+      build: .
+      restart: always
+      container_name: 4k-samba-ad
+      hostname: 4k-samba-ad
+      network_mode: "host"
+      # ports: 
+      #   - 53:53 
+      #   - 53:53/udp 
+      #   - 88:88 
+      #   - 88:88/udp 
+      #   - 123:123/udp 
+      #   - 135:135 
+      #   - 137:137/udp 
+      #   - 138:138/udp 
+      #   - 139:139 
+      #   - 389:389 
+      #   - 389:389/udp 
+      #   - 445:445
+      #   - 464:464 
+      #   - 464:464/udp 
+      #   - 636:636
+      #   - 3268:3268
+      #   - 3269:3269
+      #   - 49152-65535:49152-65535
+      privileged: true
+      extra_hosts:
+        - "ad.4k.com.br ad:10.10.10.1"
+      dns_search: 4k.com.br
+      dns: 10.10.10.1
+      environment:
+        - DOMAIN=4k.com.br
+        - AD_NAME_SERVER=ad.4k.com.br
+        - NETBIOS_NAME=ad
+        - SAMBA_DOMAIN=4K
+        - SAMBA_REALM=4K.COM.BR
+        - IP_BIND_SAMBA_AD_SERVER=10.10.10.1
+        - SAMBA_ADMIN_PASSWORD=A5AU7cws
+      volumes:
+        - /sys/fs/cgroup:/sys/fs/cgroup
+        - /4k-data/samba4/netlogon/scripts:/usr/local/samba/var/locks/sysvol/4k.com.br/scripts
+        - /4k-data/samba4/private:/usr/local/samba/private
+        - /4k-data/samba4/etc:/usr/local/samba/etc
+        - /4k-data/samba4/users:/usr/local/samba/users
+        - /4k-data/samba4/public:/usr/local/samba/public
